@@ -9,6 +9,62 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 from cyclingdb.data.loader import load_riders_data, get_data_stats
 from cyclingdb.search.engine import RiderSearchEngine
 
+# Column name mappings for tooltips
+COLUMN_TOOLTIPS = {
+    'Name': 'Rider Name',
+    'Team': 'Team Name', 
+    'Age': 'Age',
+    'Eval': 'Evaluation',
+    'FL': 'Flat',
+    'MO': 'Mountain',
+    'HL': 'Hill',
+    'BA': 'Baroudeur',
+    'DH': 'Downhill',
+    'CS': 'Cobblestones',
+    'TT': 'Time Trial',
+    'PR': 'Prologue',
+    'SP': 'Sprint',
+    'AC': 'Acceleration',
+    'ST': 'Stamina',
+    'RS': 'Resistance',
+    'RC': 'Recovery'
+}
+
+def create_styled_dataframe(df):
+    """Create a styled dataframe with column tooltips."""
+    # Create column configuration for st.dataframe
+    column_config = {}
+    
+    # Define numeric stat columns (for special formatting)
+    stat_columns = ['FL', 'MO', 'HL', 'BA', 'DH', 'CS', 'TT', 'PR', 'SP', 'AC', 'ST', 'RS', 'RC']
+    
+    for col in df.columns:
+        if col in COLUMN_TOOLTIPS:
+            if col in stat_columns:
+                # Style numeric stat columns with progress bar
+                column_config[col] = st.column_config.ProgressColumn(
+                    label=col,
+                    help=COLUMN_TOOLTIPS[col],
+                    min_value=0,
+                    max_value=100,
+                    format="%d"
+                )
+            elif col == 'Age':
+                # Style age column as number
+                column_config[col] = st.column_config.NumberColumn(
+                    label=col,
+                    help=COLUMN_TOOLTIPS[col],
+                    format="%d"
+                )
+            else:
+                # Regular text columns
+                column_config[col] = st.column_config.Column(
+                    label=col,
+                    help=COLUMN_TOOLTIPS[col]
+                )
+    
+    return column_config
+
 # Page configuration
 st.set_page_config(
     page_title="CyclingDB - PCM25 Rider Database", 
@@ -107,11 +163,15 @@ st.markdown("---")
 st.header("Riders")
 
 if len(filtered_df) > 0:
-    # Display the filtered data
+    # Create column configuration with tooltips
+    column_config = create_styled_dataframe(filtered_df)
+    
+    # Display the filtered data with tooltips
     st.dataframe(
         filtered_df,
         use_container_width=True,
-        hide_index=True
+        hide_index=True,
+        column_config=column_config
     )
     
     # Download button for filtered results
