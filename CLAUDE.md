@@ -29,7 +29,11 @@ A lekker Streamlit web app to search and filter the PCM25 rider database with st
 - `app/main.py`: Layout: Title → Filters → Stats → Styled Table
 
 ## Development Workflow
-- Format code with Ruff before commits: `uv run ruff format .`
-- Check code: `uv run ruff check .`
-- Run app: `uv run streamlit run app/main.py`
-- Commit all changes to git with clear messages
+- **Git Integration**: Work closely with git and GitHub for all development
+- **Issue Management**: Create GitHub issues for new features/bugs using `gh issue create`
+- **Branch Management**: Checkout feature branches for issues using `gh issue develop <issue#>`
+- **Code Quality**: Format with `uv run ruff format .` and check with `uv run ruff check .`
+- **Testing**: Run app with `uv run streamlit run app/main.py`
+- **Commits**: Use clear, descriptive commit messages referencing issues with "Fixes #N"
+- **Package Imports**: Use proper package imports (no path hacking)
+- **Pull Requests**: Create PRs for feature branches and reference related issues
