@@ -43,6 +43,41 @@ def load_riders_data():
         # Remove empty columns (like 'Unnamed: 17')
         df = df.dropna(axis=1, how="all")
 
+        # Calculate overall rating as average of stat columns and replace Eval column
+        stat_columns = [
+            "FL",
+            "MO",
+            "HL",
+            "BA",
+            "DH",
+            "CS",
+            "TT",
+            "PR",
+            "SP",
+            "AC",
+            "ST",
+            "RS",
+            "RC",
+        ]
+        existing_stat_cols = [col for col in stat_columns if col in df.columns]
+
+        if existing_stat_cols:
+            # Convert stat columns to numeric, replacing any non-numeric values with NaN
+            for col in existing_stat_cols:
+                df[col] = pd.to_numeric(df[col], errors="coerce")
+
+            # Calculate mean, ignoring NaN values
+            df["Eval"] = df[existing_stat_cols].mean(axis=1, skipna=True)
+
+            # Round to 1 decimal place for cleaner display
+            df["Eval"] = df["Eval"].round(1)
+
+            st.info(
+                f"Calculated Eval column from {len(existing_stat_cols)} stat columns. Range: {df['Eval'].min():.1f} - {df['Eval'].max():.1f}"
+            )
+        else:
+            st.warning("No stat columns found for Eval calculation")
+
         # Basic data validation
         if df.empty:
             st.error("CSV file is empty")

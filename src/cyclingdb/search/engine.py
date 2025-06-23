@@ -62,12 +62,14 @@ class RiderSearchEngine:
             if max_age is not None:
                 result_df = result_df[result_df["Age"] <= max_age]
 
-        # Overall rating filter
-        if "Overall" in result_df.columns:
+        # Overall rating filter using Eval column
+        if "Eval" in result_df.columns and (
+            min_overall is not None or max_overall is not None
+        ):
             if min_overall is not None:
-                result_df = result_df[result_df["Overall"] >= min_overall]
+                result_df = result_df[result_df["Eval"] >= min_overall]
             if max_overall is not None:
-                result_df = result_df[result_df["Overall"] <= max_overall]
+                result_df = result_df[result_df["Eval"] <= max_overall]
 
         # Specialization filter (find highest stat)
         if specialization and specialization.strip():

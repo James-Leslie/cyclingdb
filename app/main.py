@@ -1,9 +1,4 @@
 import streamlit as st
-import sys
-from pathlib import Path
-
-# Add the src directory to the path so we can import our modules
-sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from cyclingdb.data.loader import load_riders_data
 from cyclingdb.search.engine import RiderSearchEngine
@@ -105,41 +100,74 @@ st.header("Search & Filters")
 # Search box
 search_term = st.text_input("Search riders by name", placeholder="Enter rider name...")
 
-# Additional filter options
-filter_col1, filter_col2, filter_col3, filter_col4 = st.columns(4)
+# Filter options in a clean layout
+filter_row1_col1, filter_row1_col2, filter_row1_col3, filter_row1_col4 = st.columns(4)
 
-with filter_col1:
+with filter_row1_col1:
     # Get unique teams for dropdown
     unique_teams = search_engine.get_unique_values("Team")
     team_filter = st.multiselect("Team", options=unique_teams)
 
-with filter_col2:
-    st.write("")  # Empty space for now
-
-with filter_col3:
-    min_age = st.number_input("Min Age", min_value=16, max_value=50, value=16)
-
-with filter_col4:
-    max_age = st.number_input("Max Age", min_value=16, max_value=50, value=45)
-
-# Additional filters row
-filter_col5, filter_col6, filter_col7, filter_col8 = st.columns(4)
-
-with filter_col5:
-    min_overall = st.number_input("Min Overall", min_value=0, max_value=100, value=0)
-
-with filter_col6:
-    max_overall = st.number_input("Max Overall", min_value=0, max_value=100, value=100)
-
-with filter_col7:
+with filter_row1_col2:
     specialization = st.selectbox(
         "Specialization",
         options=["", "mountain", "sprint", "time trial", "classics", "overall"],
         index=0,
     )
 
-with filter_col8:
-    st.write("")  # Empty space
+with filter_row1_col3:
+    # Get age range from database
+    age_min = int(riders_df["Age"].min()) if "Age" in riders_df.columns else 16
+    age_max = int(riders_df["Age"].max()) if "Age" in riders_df.columns else 50
+    age_range = st.slider(
+        "Age Range", min_value=age_min, max_value=age_max, value=(age_min, age_max)
+    )
+    min_age, max_age = age_range
+    # Only filter if not using full range
+    if (min_age, max_age) == (age_min, age_max):
+        min_age = max_age = None
+
+with filter_row1_col4:
+    st.write("")  # Empty since age is now a single range slider
+
+# Second row for overall rating filters
+filter_row2_col1, filter_row2_col2, filter_row2_col3, filter_row2_col4 = st.columns(4)
+
+with filter_row2_col1:
+    # Use the calculated Eval column for overall rating filtering
+    if "Eval" in riders_df.columns:
+        overall_min = int(riders_df["Eval"].min())
+        overall_max = int(riders_df["Eval"].max())
+
+        # Check if we have a valid range
+        if overall_min < overall_max:
+            overall_range = st.slider(
+                "Overall Rating (Eval)",
+                min_value=overall_min,
+                max_value=overall_max,
+                value=(overall_min, overall_max),
+            )
+            min_overall, max_overall = overall_range
+            # Only filter if not using full range
+            if (min_overall, max_overall) == (overall_min, overall_max):
+                min_overall = max_overall = None
+        else:
+            # All values are the same, no point in filtering
+            min_overall = max_overall = None
+            st.info(f"All riders have the same Eval rating ({overall_min})")
+    else:
+        # No Eval column found, disable overall filtering
+        min_overall = max_overall = None
+        st.info("No Eval column found")
+
+with filter_row2_col2:
+    st.write("")  # Empty since overall is now a single range slider
+
+with filter_row2_col3:
+    st.write("")  # Reserved for future filter
+
+with filter_row2_col4:
+    st.write("")  # Reserved for future filter
 
 # Perform search
 filtered_df = search_engine.search(
@@ -147,8 +175,8 @@ filtered_df = search_engine.search(
     team=team_filter if team_filter else None,
     min_age=min_age,
     max_age=max_age,
-    min_overall=min_overall if min_overall > 0 else None,
-    max_overall=max_overall if max_overall < 100 else None,
+    min_overall=min_overall,
+    max_overall=max_overall,
     specialization=specialization if specialization else None,
 )
 
