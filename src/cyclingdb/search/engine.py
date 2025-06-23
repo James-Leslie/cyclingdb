@@ -18,8 +18,7 @@ class RiderSearchEngine:
     def search(
         self,
         name_query: Optional[str] = None,
-        nationality: Optional[str] = None,
-        team: Optional[str] = None,
+        team: Optional[list] = None,
         min_age: Optional[int] = None,
         max_age: Optional[int] = None,
         min_overall: Optional[int] = None,
@@ -30,8 +29,7 @@ class RiderSearchEngine:
         
         Args:
             name_query: Partial name search (case-insensitive)
-            nationality: Filter by nationality
-            team: Filter by team name
+            team: Filter by team names (list)
             min_age: Minimum age
             max_age: Maximum age
             min_overall: Minimum overall rating
@@ -53,24 +51,10 @@ class RiderSearchEngine:
                 )
                 result_df = result_df[mask]
         
-        # Filter by nationality
-        if nationality and nationality.strip():
-            if 'Nationality' in result_df.columns:
-                mask = result_df['Nationality'].str.contains(
-                    nationality.strip(),
-                    case=False,
-                    na=False
-                )
-                result_df = result_df[mask]
-        
-        # Filter by team
-        if team and team.strip():
+        # Filter by team (multiselect)
+        if team and len(team) > 0:
             if 'Team' in result_df.columns:
-                mask = result_df['Team'].str.contains(
-                    team.strip(),
-                    case=False,
-                    na=False
-                )
+                mask = result_df['Team'].isin(team)
                 result_df = result_df[mask]
         
         # Age range filter
@@ -183,7 +167,6 @@ class RiderSearchEngine:
         
         stats = {
             'total_riders': len(df_to_analyze),
-            'countries': df_to_analyze['Nationality'].nunique() if 'Nationality' in df_to_analyze.columns else 0,
             'teams': df_to_analyze['Team'].nunique() if 'Team' in df_to_analyze.columns else 0,
             'avg_age': df_to_analyze['Age'].mean() if 'Age' in df_to_analyze.columns else 0
         }

@@ -41,6 +41,9 @@ def load_riders_data():
         # Clean column names (strip whitespace)
         df.columns = df.columns.str.strip()
         
+        # Remove empty columns (like 'Unnamed: 17')
+        df = df.dropna(axis=1, how='all')
+        
         # Basic data validation
         if df.empty:
             st.error("CSV file is empty")
@@ -106,7 +109,7 @@ def validate_csv_structure(df: pd.DataFrame) -> bool:
     Returns:
         bool: True if structure is valid
     """
-    expected_columns = ['Name', 'Nationality', 'Team', 'Age']
+    expected_columns = ['Name', 'Team', 'Age']
     
     for col in expected_columns:
         if col not in df.columns:

@@ -41,10 +41,12 @@ search_term = st.text_input("Search riders by name", placeholder="Enter rider na
 filter_col1, filter_col2, filter_col3, filter_col4 = st.columns(4)
 
 with filter_col1:
-    nationality_filter = st.text_input("Nationality", placeholder="e.g. France")
+    # Get unique teams for dropdown
+    unique_teams = search_engine.get_unique_values('Team')
+    team_filter = st.multiselect("Team", options=unique_teams)
 
 with filter_col2:
-    team_filter = st.text_input("Team", placeholder="e.g. Team UAE")
+    st.write("")  # Empty space for now
 
 with filter_col3:
     min_age = st.number_input("Min Age", min_value=16, max_value=50, value=16)
@@ -72,7 +74,6 @@ with filter_col8:
 # Perform search
 filtered_df = search_engine.search(
     name_query=search_term if search_term else None,
-    nationality=nationality_filter if nationality_filter else None,
     team=team_filter if team_filter else None,
     min_age=min_age,
     max_age=max_age,
@@ -94,9 +95,9 @@ stats_col1, stats_col2, stats_col3, stats_col4 = st.columns(4)
 with stats_col1:
     st.metric("Total Riders", f"{overall_stats['total_riders']:,}")
 with stats_col2:
-    st.metric("Countries", f"{overall_stats['countries']:,}")
-with stats_col3:
     st.metric("Teams", f"{overall_stats['teams']:,}")
+with stats_col3:
+    st.metric("Average Age", f"{overall_stats['avg_age']:.1f}")
 with stats_col4:
     st.metric("Filtered", f"{filtered_stats['total_riders']:,}")
 
