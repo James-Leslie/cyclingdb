@@ -1,81 +1,35 @@
 # Pro Cycling Manager 25 Database Search App
 
-Build a Streamlit web app to search the PCM25 rider database.
+Streamlit web app to search and filter the PCM25 rider database with styled data display.
 
 ## Core Requirements
-- Download CSV from: https://web.cyanide-studio.com/games/cycling/2025/pcm/riders/?export=csv
-- Main app file: `app/main.py`
-- Package name: `cyclingdb` in `src/cyclingdb/`
-- Use UV for dependency management
+- Auto-download CSV from: https://web.cyanide-studio.com/games/cycling/2025/pcm/riders/?export=csv
+- Main app: `app/main.py`
+- Package: `cyclingdb` in `src/cyclingdb/`
+- Dependencies: UV package manager
 
-## Key Features
+## Features Built
+- **Name search**: Partial matching, case-insensitive
+- **Team filter**: Multiselect dropdown with real team names
+- **Age/Rating filters**: Min/max ranges for age and overall stats
+- **Specialization filter**: Mountain, sprint, time trial, etc.
+- **Styled dataframe**: Progress bars for stats, tooltips on hover
+- **CSV export**: Download filtered results
+- **Real-time stats**: Total riders, teams, average age, filtered count
 
-### Search & Filters
-- Text search by rider name (partial matching, case-insensitive)
-- Filter by: nationality, team, age range, specialisation, rating ranges
-- Multiple filters should combine (AND logic)
-- Sort results by any column
+## Data Structure
+- **900 riders** across various teams
+- **Columns**: Name, Team, Age, Eval, FL, MO, HL, BA, DH, CS, TT, PR, SP, AC, ST, RS, RC
+- **CSV format**: Semicolon-delimited, UTF-8/Latin-1 encoding
+- **Stats tooltips**: FL=Flat, MO=Mountain, TT=Time Trial, SP=Sprint, etc.
 
-### Data Display
-- Results table with key columns visible
-- Click row to see full rider details
-- Export filtered results as CSV
-- Show result count and basic statistics
-
-## Implementation Details
-
-### Data Loading (`src/cyclingdb/data/loader.py`)
-```python
-@st.cache_data
-def load_riders_data():
-    # Check if data/riders.csv exists
-    # If not, download from URL using requests
-    # Load with pandas (try UTF-8, fallback to Latin-1)
-    # Return DataFrame
-```
-
-### Search Engine (`src/cyclingdb/search/engine.py`)
-- Use pandas string methods for text search
-- Apply filters using boolean indexing
-- Return filtered DataFrame
-
-### Streamlit App (`app/streamlit_app.py`)
-- Sidebar: search box + all filters
-- Main area: results table using `st.dataframe()`
-- Use `st.columns()` for layout
-- Add download button: `st.download_button()`
-- Handle empty results gracefully
-
-## CSV Handling
-- The CSV likely has Latin-1 encoding
-- Column names may have spaces - strip them
-- Expect columns like: Name, Nationality, Team, Age, Mountain, Sprint, Time Trial, Overall
-- Inspect the actual CSV structure first
-
-## Streamlit Tips
-- Use `st.sidebar` for all inputs
-- Cache expensive operations with `@st.cache_data`
-- Use `st.empty()` for loading states
-- Set page config: `st.set_page_config(page_title="PCM25 Database", layout="wide")`
-
-## Error Handling
-- Wrap CSV download in try/except
-- Show user-friendly error messages
-- Provide retry button if download fails
-- Validate CSV has expected columns
-
-## Performance
-- Only load full CSV once per session
-- Use DataFrame views, not copies
-- Limit displayed rows with pagination if >1000 results
-
-## Deployment
-- Ensure CSV is in `.gitignore` if large
-- For Streamlit Cloud: download CSV on first run
-- Set appropriate `client.maxUploadSize` in `.streamlit/config.toml` if needed
+## Architecture
+- `src/cyclingdb/data/loader.py`: Auto-download, cache with @st.cache_data
+- `src/cyclingdb/search/engine.py`: Pandas filtering with boolean indexing
+- `app/main.py`: Layout: Title → Filters → Stats → Styled Table
 
 ## Development Workflow
-- All changes MUST be committed to git
-- After each significant change, commit the work
-- Present commits to user for review before proceeding
-- Use clear, descriptive commit messages
+- Format code with Ruff before commits: `uv run ruff format .`
+- Check code: `uv run ruff check .`
+- Run app: `uv run streamlit run app/main.py`
+- Commit all changes to git with clear messages

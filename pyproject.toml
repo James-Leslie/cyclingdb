@@ -20,3 +20,8 @@ build-backend = "hatchling.build"
 [tool.hatch.build.targets.wheel]
 packages = ["src/cyclingdb"]
 include = ["src/cyclingdb/data/*"]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.12.0",
+]
