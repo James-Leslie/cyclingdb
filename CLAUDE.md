@@ -4,7 +4,7 @@ Build a Streamlit web app to search the PCM25 rider database.
 
 ## Core Requirements
 - Download CSV from: https://web.cyanide-studio.com/games/cycling/2025/pcm/riders/?export=csv
-- Main app file: `app/streamlit_app.py`
+- Main app file: `app/main.py`
 - Package name: `cyclingdb` in `src/cyclingdb/`
 - Use UV for dependency management
 
