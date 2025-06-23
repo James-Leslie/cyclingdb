@@ -1,5 +1,13 @@
 import streamlit as st
 import pandas as pd
+import sys
+from pathlib import Path
+
+# Add the src directory to the path so we can import our modules
+sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
+
+from cyclingdb.data.loader import load_riders_data, get_data_stats
+from cyclingdb.search.engine import RiderSearchEngine
 
 # Page configuration
 st.set_page_config(
@@ -11,13 +19,25 @@ st.set_page_config(
 # Title
 st.title("🚴 CyclingDB - Pro Cycling Manager 25 Rider Database")
 
+# Load the rider data
+try:
+    riders_df = load_riders_data()
+    search_engine = RiderSearchEngine(riders_df)
+    
+    # Get overall statistics
+    overall_stats = search_engine.get_stats()
+    
+except Exception as e:
+    st.error(f"Failed to load rider data: {str(e)}")
+    st.stop()
+
 # Search and Filters Section
 st.header("Search & Filters")
 
 # Search box
 search_term = st.text_input("Search riders by name", placeholder="Enter rider name...")
 
-# Filters in columns
+# Additional filter options
 filter_col1, filter_col2, filter_col3, filter_col4 = st.columns(4)
 
 with filter_col1:
@@ -27,13 +47,42 @@ with filter_col2:
     team_filter = st.text_input("Team", placeholder="e.g. Team UAE")
 
 with filter_col3:
-    min_age = st.number_input("Min Age", min_value=16, max_value=50, value=20)
+    min_age = st.number_input("Min Age", min_value=16, max_value=50, value=16)
 
 with filter_col4:
-    max_age = st.number_input("Max Age", min_value=16, max_value=50, value=40)
+    max_age = st.number_input("Max Age", min_value=16, max_value=50, value=45)
 
-# Apply filters button
-apply_filters = st.button("Apply Filters", type="primary")
+# Additional filters row
+filter_col5, filter_col6, filter_col7, filter_col8 = st.columns(4)
+
+with filter_col5:
+    min_overall = st.number_input("Min Overall", min_value=0, max_value=100, value=0)
+
+with filter_col6:
+    max_overall = st.number_input("Max Overall", min_value=0, max_value=100, value=100)
+
+with filter_col7:
+    specialization = st.selectbox("Specialization", 
+                                 options=["", "mountain", "sprint", "time trial", "classics", "overall"],
+                                 index=0)
+
+with filter_col8:
+    st.write("")  # Empty space
+
+# Perform search
+filtered_df = search_engine.search(
+    name_query=search_term if search_term else None,
+    nationality=nationality_filter if nationality_filter else None,
+    team=team_filter if team_filter else None,
+    min_age=min_age,
+    max_age=max_age,
+    min_overall=min_overall if min_overall > 0 else None,
+    max_overall=max_overall if max_overall < 100 else None,
+    specialization=specialization if specialization else None
+)
+
+# Get filtered statistics
+filtered_stats = search_engine.get_stats(filtered_df)
 
 st.markdown("---")
 
@@ -43,47 +92,44 @@ st.header("Statistics")
 stats_col1, stats_col2, stats_col3, stats_col4 = st.columns(4)
 
 with stats_col1:
-    st.metric("Total Riders", "0")
+    st.metric("Total Riders", f"{overall_stats['total_riders']:,}")
 with stats_col2:
-    st.metric("Countries", "0")
+    st.metric("Countries", f"{overall_stats['countries']:,}")
 with stats_col3:
-    st.metric("Teams", "0")
+    st.metric("Teams", f"{overall_stats['teams']:,}")
 with stats_col4:
-    st.metric("Filtered", "0")
+    st.metric("Filtered", f"{filtered_stats['total_riders']:,}")
 
 st.markdown("---")
 
 # Data Table Section
 st.header("Riders")
 
-# Placeholder for data table
-if st.button("Load Sample Data"):
-    # Create sample data for testing
-    sample_data = pd.DataFrame({
-        'Name': ['John Doe', 'Jane Smith', 'Pierre Dubois'],
-        'Nationality': ['USA', 'GBR', 'FRA'],
-        'Team': ['Team A', 'Team B', 'Team C'],
-        'Age': [25, 28, 32],
-        'Overall': [75, 82, 68],
-        'Mountain': [70, 85, 60],
-        'Sprint': [80, 65, 75]
-    })
-    
+if len(filtered_df) > 0:
+    # Display the filtered data
     st.dataframe(
-        sample_data,
+        filtered_df,
         use_container_width=True,
         hide_index=True
     )
     
-    # Download button
+    # Download button for filtered results
+    csv_data = filtered_df.to_csv(index=False)
     st.download_button(
-        label="Download CSV",
-        data=sample_data.to_csv(index=False),
+        label=f"Download Filtered Results ({len(filtered_df)} riders)",
+        data=csv_data,
         file_name="filtered_riders.csv",
         mime="text/csv"
     )
+    
+    # Show column info
+    with st.expander("Column Information"):
+        st.write("**Available Columns:**")
+        for col in filtered_df.columns:
+            st.write(f"- {col}")
+            
 else:
-    st.info("Click 'Load Sample Data' to see the interface in action, or implement the data loader to load real PCM25 data.")
+    st.warning("No riders match the current filters. Try adjusting your search criteria.")
 
 # Footer
 st.markdown("---")
