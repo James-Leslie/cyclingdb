@@ -1,5 +1,5 @@
-# Data files
-data/
+# Data files (CSV downloads, not source code)
+/data/
 *.csv
 
 # Python
