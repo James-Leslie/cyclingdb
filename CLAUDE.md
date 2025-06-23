@@ -1,6 +1,6 @@
 # Pro Cycling Manager 25 Database Search App
 
-Streamlit web app to search and filter the PCM25 rider database with styled data display.
+A lekker Streamlit web app to search and filter the PCM25 rider database with styled data display.
 
 ## Core Requirements
 - Auto-download CSV from: https://web.cyanide-studio.com/games/cycling/2025/pcm/riders/?export=csv

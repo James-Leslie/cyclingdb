@@ -55,12 +55,12 @@ def create_styled_dataframe(df):
     for col in df.columns:
         if col in COLUMN_TOOLTIPS:
             if col in stat_columns:
-                # Style numeric stat columns with progress bar
+                # Style numeric stat columns with progress bar (PCM range: 50-85)
                 column_config[col] = st.column_config.ProgressColumn(
                     label=col,
                     help=COLUMN_TOOLTIPS[col],
-                    min_value=0,
-                    max_value=100,
+                    min_value=50,
+                    max_value=85,
                     format="%d",
                 )
             elif col == "Age":
