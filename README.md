@@ -63,6 +63,14 @@ cyclingdb/
 └── README.md               # This file
 ```
 
+## CDB File Tools
+
+For working with Pro Cycling Manager CDB database files directly:
+
+- **Full Editor V4**: https://pcmdaily.com/infusions/pro_download_panel/download.php?did=907
+  - Contains `PCM2008_CDB_to_XML.exe` for converting CDB files to XML format
+  - Useful for extracting data from game installation files
+
 ## Contributing
 
 1. Make changes to the code
